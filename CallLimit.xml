@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<voicemail xmlns="http://www.innovaphone.com/xsd/voicemail6.xsd">
+<!-- == Limit duration and call - innovaphone AG 2020 KWA -->
+    <function define="Main">
+	<assign out="$Repeat" value="4" />
+	<timer name="vbguard" sec="30" />
+	<event type="timer" name="vbguard">
+  		<pbx-disc /> 
+  	</event>
+	<pbx-getcallinfo out-cgpn="$cgpn" out-cdpn="$cdpn" out-leg2="$leg2" />
+	<lib-strcat out-string="$myFile" string="$leg2" string2=".txt"/>
+	<store-getstat name="NULL" out-mday="$heute"/>
+	<store-getstat root="" name="$myFile" out-error="$error" out-mday="$mday" />
+	<if cond="$error">
+        	<store-cookie root="" name="$myFile" value="1"/>
+		<pbx-fwd e164="$leg2" barge-in="false" />
+        </if>
+	<switch var="$mday">
+            <case not-equal="$heute">
+		<store-cookie root="" name="$myFile" value="1"/>
+		<pbx-fwd e164="$leg2" />
+	    </case>
+	</switch>
+	<store-cookie root="" name="$myFile" out="$calls"/>
+	<add value="1" value2="$calls" out="$res"/> 
+	<switch var="$res">
+            <case greater="$Repeat">
+		<store-get root="" name="Track101.$coder" out-url="$ctrl"/>
+                <pbx-prompt url="$ctrl"/>
+	    	<pbx-disc /> 
+            </case>
+	</switch>
+	<wait sec="1"/>
+	<store-cookie root="" name="$myFile" value="$res"/>
+	<pbx-fwd e164="$leg2" barge-in="false" />
+ </function>
+</voicemail>
+
+<!-- Call_Limit wiki-src/xml/Call_Limit 1,0,0,0 (C) innovaphone AG 2010-2020 -->
